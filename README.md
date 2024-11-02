@@ -17,3 +17,10 @@ Setup
 6. apply deployment file `kubectl -n scrapper apply -f deployment-svc.yaml` 
 7. start service tunnel `minikube service flask-gateway-server -n scrapper`
 8. hit api and test
+
+
+Connect to Mongo instance:
+pre req - `brew install mongosh`
+
+1. `ktemp port-forward service/mongo 27017:27017`
+2. `mongosh -u admin -p password --authenticationDatabase admin`
