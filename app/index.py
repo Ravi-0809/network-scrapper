@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from selenium_utils import capture_network_calls
 from validations import validate_input_data
 
 app = Flask(__name__)
@@ -20,5 +21,7 @@ def process_json_list():
     except Exception as e:
         return jsonify({"error": repr(e)}), 400
     
-    # Return the processed list
-    return jsonify(processed_data), 200
+    sample_url = processed_data[0]["url"]
+    calls = capture_network_calls(sample_url)
+
+    return jsonify(calls), 200
