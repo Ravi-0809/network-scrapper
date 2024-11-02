@@ -1,11 +1,10 @@
 from flask import Flask, request, jsonify
-from selenium_utils import capture_network_calls_headless, capture_network_calls_ui
 from validations import validate_input_data
-from mongo_utils import write
+from job_handler import create_jobs
 
 app = Flask(__name__)
 
-@app.route('/status-check')
+@app.route('/')
 def hello():
     return 'true'
 
@@ -24,18 +23,9 @@ def process_json_list():
     except Exception as e:
         return jsonify({"error": repr(e)}), 400
     
-    sample_url = processed_data[0]["url"]
-    calls = []
-    if (headless == "true"):
-        print("using headless mode")
-        calls = capture_network_calls_headless(sample_url)
-    else:
-        print("using ui mode")
-        calls = capture_network_calls_ui(sample_url)
-    
-    write(url=sample_url, raw_data=calls)
+    create_jobs(processed_data=processed_data)
 
-    return jsonify(calls), 200
+    return jsonify({"message": f"Scheduled {len(processed_data)} jobs successfully"}), 200
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
