@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from selenium_utils import capture_network_calls
+from selenium_utils import capture_network_calls_headless, capture_network_calls_ui
 from validations import validate_input_data
 
 app = Flask(__name__)
@@ -10,6 +10,8 @@ def hello():
 
 @app.route('/scrape/network', methods=['POST'])
 def process_json_list():
+    headless = request.args.get('headless', default="true", type=str)
+
     if not request.is_json:
         return jsonify({"error": "invalid input, JSON expected"}), 400
     
@@ -22,6 +24,15 @@ def process_json_list():
         return jsonify({"error": repr(e)}), 400
     
     sample_url = processed_data[0]["url"]
-    calls = capture_network_calls(sample_url)
+    calls = []
+    if (headless == "true"):
+        print("using headless mode")
+        calls = capture_network_calls_headless(sample_url)
+    else:
+        print("using ui mode")
+        calls = capture_network_calls_ui(sample_url)
 
     return jsonify(calls), 200
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', debug=True)
