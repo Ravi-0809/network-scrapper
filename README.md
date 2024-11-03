@@ -108,5 +108,9 @@ pre requisite - `brew install mongosh`
             - `entries` array from the HAR can be stored as individual documents with adding a property for the input url. This would help break the HAR into smaller documents, query individual entries of the HAR or get all the entries for a given input url
     - Since the usecase for the data could vary, none of the mentioned or other methods were implemented for data storage
 
+### Mongodb physical storage
+- In the mongo deployment file, the pvc mount has been commented which leads to the service defaulting to the pod storage (which is non permanent)
+- The PV and PVC config files have also been added to the `mongo` subfolder to deploy with a more permanent storage when required
+
 ### Remote docker images
 - To replicate the project more easily, the docker images for flask-gateway-server and selenium-job can be pushed to remote registries and pulled from there
