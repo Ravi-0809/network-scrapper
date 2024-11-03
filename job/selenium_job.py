@@ -14,7 +14,6 @@ proxy_path = "/opt/browsermob-proxy-2.1.4/bin/browsermob-proxy"
 
 
 def capture_network_calls_headless(url, username = None, password = None):
-    network_calls = []
     har_data = {}
 
     server = Server(proxy_path)

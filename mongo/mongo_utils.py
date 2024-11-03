@@ -1,4 +1,6 @@
 from pymongo import MongoClient
+from bson import json_util
+import json
 import time
 
 mongo_client = MongoClient("mongodb://admin:password@mongo:27017/")
@@ -11,7 +13,13 @@ def write(url, raw_data):
         "data": raw_data,
         "ts": int(time.time() * 1000)
     }
-    result = collection.insert_one(data)
+    query = {"url":url}
+    result = collection.replace_one(query, data, upsert=True)
+
+def parse_mongo_json(data):
+    return json.loads(json_util.dumps(data))
 
 def read(url):
-    pass
+    query = {"url":url}
+    document = collection.find_one(query)
+    return parse_mongo_json(document)

@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
 # Set environment variables for Chrome and ChromeDriver
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROME_DRIVER=/usr/bin/chromedriver
+ENV PYTHONPATH="${PYTHONPATH}:/usr/src/network-scrapper"
 
 WORKDIR /usr/src/network-scrapper
 COPY . .

@@ -1,8 +1,9 @@
 from flask import jsonify
 from marshmallow import ValidationError
-from representations import URLInput
+from representations import URLInput, URLInputRead
 
 input_schema = URLInput()
+input_schema_read = URLInputRead()
 
 def validate_input_data(data):
     # Ensure the input is a list of JSON objects
@@ -22,3 +23,9 @@ def validate_input_data(data):
             raise Exception(err.messages)
     
     return processed_data
+
+def validate_get_query_input(data):
+    try:
+        input_schema_read.load(data)
+    except ValidationError as err:
+        raise Exception(err.messages)

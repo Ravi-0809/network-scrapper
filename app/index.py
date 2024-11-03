@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-from validations import validate_input_data
+from validations import validate_input_data, validate_get_query_input
 from job_handler import create_jobs
+from mongo.mongo_utils import read as readFromMongo
 
 app = Flask(__name__)
 
@@ -10,8 +11,6 @@ def hello():
 
 @app.route('/scrape/network', methods=['POST'])
 def process_json_list():
-    headless = request.args.get('headless', default="true", type=str)
-
     if not request.is_json:
         return jsonify({"error": "invalid input, JSON expected"}), 400
     
@@ -27,5 +26,16 @@ def process_json_list():
 
     return jsonify({"message": f"Scheduled {len(processed_data)} jobs successfully"}), 200
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+@app.route('/get/full', methods=['POST'])
+def get_full_document():
+    data = request.get_json()
+    
+    try:
+        validate_get_query_input(data=data)
+    except Exception as e:
+        return jsonify({"error": repr(e)}), 400
+    
+    url = data["url"]
+    doc = readFromMongo(url=url)
+    
+    return jsonify(doc), 200  
