@@ -15,7 +15,9 @@
 - Multiple jobs can be triggered in parallel and the output is stored in mongodb
 ### Data Storage
 - Scraped HAR data is stored as a json in mongodb directly
-- An attribute of the input URL is added for easier retrieval for the GET API
+- The attributes `input URL` and `timestamp` are added for easier retrieval for the GET API
+- Only one HAR document is stored per input URL. If the same URL is passed again, the existing data would be overwritten.
+    - This choice was made because this is a sample project. In production, we could version the documents or query by timestamp
 - Further optimisation to be done in the way data is stored which is mentioned at the end
 
 ## APIs and Usage
@@ -101,9 +103,10 @@ pre requisite - `brew install mongosh`
     - If data needs to be read frequently:
         - If entire document needs to be read together:
             - blob storage can be used here as well
-            - or GridFS from mongodb can be used
+            - GridFS from mongodb can be used
         - If document should be queried in parts:
             - `entries` array from the HAR can be stored as individual documents with adding a property for the input url. This would help break the HAR into smaller documents, query individual entries of the HAR or get all the entries for a given input url
+    - Since the usecase for the data could vary, none of the mentioned or other methods were implemented for data storage
 
 ### Remote docker images
 - To replicate the project more easily, the docker images for flask-gateway-server and selenium-job can be pushed to remote registries and pulled from there
