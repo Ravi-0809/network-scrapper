@@ -5,11 +5,13 @@ import json
 import time
 import argparse
 from mongo.mongo_utils import write as writeToMongoDb
+from urllib.parse import quote
 
 driver_path = "/usr/bin/chromedriver"
 # driver_path = "/opt/homebrew/bin/chromedriver"
 
-# for testing
+selenium_url = "http://selenium-service.scrapper:4444/wd/hub"
+
 def capture_network_calls_ui(url, username = None, password = None):
     network_calls = []
     options = Options()
@@ -20,7 +22,11 @@ def capture_network_calls_ui(url, username = None, password = None):
     options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
     
     service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=options)
+    # driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Remote(
+        command_executor=selenium_url,
+        options=options
+    )
     
     try:
         driver.get(url)
@@ -55,9 +61,20 @@ def capture_network_calls_headless(url, username = None, password = None):
     
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=options)
+
+    updated_url = url
+    if (username != None and password != None and username!= ""):
+        base_url = ""
+        if ("https://" in url):
+            base_url = url.split("https://")[1]
+        elif ("http://" in url):
+            base_url = url.split("http://")[1]
+        else:
+            base_url = url
+        updated_url = f"{quote(username)}:{quote(password)}@{base_url}"
     
     try:
-        driver.get(url)
+        driver.get(updated_url)
         
         time.sleep(5) # wait 5 sec for all network calls
 
@@ -93,7 +110,7 @@ if __name__ == "__main__":
     print("----------")
 
     # get network calls using selenium
-    calls = capture_network_calls_headless(args.url, args.username, args.password)
+    calls = capture_network_calls_ui(args.url, args.username, args.password)
     print(calls)
 
     # write to db
