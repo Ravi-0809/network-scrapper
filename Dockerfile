@@ -4,9 +4,6 @@ FROM python:3.11.3-slim
 RUN apt-get update && apt-get install -y \
     chromium-driver \
     chromium \
-    xvfb \
-    libfontconfig1 \
-    libxrender1 \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
@@ -21,8 +18,5 @@ EXPOSE 5000
 ENV FLASK_APP=app/index.py
 ENV FLASK_ENV=development
 
-# Set the display environment variable for Xvfb
-ENV DISPLAY=:99
-
-# Run Xvfb in the background, then start Flask
-CMD Xvfb :99 -screen 0 1920x1080x24 & flask run --host=0.0.0.0
+# start Flask
+CMD flask run --host=0.0.0.0

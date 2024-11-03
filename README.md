@@ -1,12 +1,9 @@
 # network-scrapper
 
 Pending:
-1. test the username+password auth
-2. jobs and auto scale 
-
-Questions:
-1. Do we only need to capture network calls or request/response data as well?
-2. 
+2. clean-up code
+3. clean-up readme and create a simple bash script for starting
+4. create video
 
 
 Setup

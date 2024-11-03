@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-hub
+  namespace: scrapper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selenium-hub
+  template:
+    metadata:
+      labels:
+        app: selenium-hub
+    spec:
+      containers:
+        - name: selenium-hub
+          image: selenium/hub
+          ports:
+            - containerPort: 4444
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-node-chrome
+  namespace: scrapper
+spec:
+  replicas: 3  # Number of Chrome nodes for parallel sessions
+  selector:
+    matchLabels:
+      app: selenium-node-chrome
+  template:
+    metadata:
+      labels:
+        app: selenium-node-chrome
+    spec:
+      containers:
+        - name: selenium-node-chrome
+          image: seleniarm/node-chromium
+          env:
+            - name: HUB_HOST
+              value: selenium-hub  # Connects to the hub service
+          ports:
+            - containerPort: 5555
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium-hub-service
+  namespace: scrapper
+spec:
+  selector:
+    app: selenium-hub
+  ports:
+    - protocol: TCP
+      port: 4444
+      targetPort: 4444
