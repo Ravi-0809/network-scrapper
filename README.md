@@ -1,20 +1,22 @@
 # network-scrapper
 
-Pending:
-2. clean-up readme
-3. create video
+## Architecture and Design
+![basic components diagram](./network_scraper_arch.png)
 
 ## Description
 
 ### Gateway Service
-TODO
+- Python flask server to accept input for scraping via API
+- When "n" inputs are given, the service creates "n" kubernetes `Job`s to execute the scraping tasks in parallel
+- Also used to query and return scraped data from the database via API
 ### Scraping
-TODO
+- Selenium is used in a headless mode to scrape HAR data from the input url as a json
+- The script for scraping is containerised and run as a `Job` in the kubernetes cluster
+- Multiple jobs can be triggered in parallel and the output is stored in mongodb
 ### Data Storage
-TODO
-
-## Architecture and Design
-TODO
+- Scraped HAR data is stored as a json in mongodb directly
+- An attribute of the input URL is added for easier retrieval for the GET API
+- Further optimisation to be done in the way data is stored which is mentioned at the end
 
 ## APIs and Usage
 Interaction with the project is through the flask gateway server which have the below two APIs exposed:
@@ -82,9 +84,26 @@ Interaction with the project is through the flask gateway server which have the 
     minikube service flask-gateway-server -n scrapper
     ```
 
-
 ## Connect to Mongo instance:
-pre req - `brew install mongosh`
+pre requisite - `brew install mongosh`
 
 1. `kubectl -n scrapper port-forward service/mongo 27017:27017`
 2. `mongosh -u admin -p password --authenticationDatabase admin`
+
+
+## Future improvements
+
+### Data storage
+- The HAR data is being directly stored into mongodb currently. This is infesible at scale due to potential size of the overall database and also the size of each document (max of 16 MB)
+- Based on how the data needs to be used and the query patterns, we can do one of the following:
+    - If data needs to be read rarely:
+        - use a blob storage to store the HAR json and store a reference to the file along with the input url in mongo
+    - If data needs to be read frequently:
+        - If entire document needs to be read together:
+            - blob storage can be used here as well
+            - or GridFS from mongodb can be used
+        - If document should be queried in parts:
+            - `entries` array from the HAR can be stored as individual documents with adding a property for the input url. This would help break the HAR into smaller documents, query individual entries of the HAR or get all the entries for a given input url
+
+### Remote docker images
+- To replicate the project more easily, the docker images for flask-gateway-server and selenium-job can be pushed to remote registries and pulled from there
